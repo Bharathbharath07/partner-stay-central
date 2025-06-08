@@ -7,15 +7,7 @@ import TourBookings from '@/components/Bookings/TourBookings';
 import HotelListings from '@/components/Listings/HotelListings';
 import PartnerMessages from '@/components/Messages/PartnerMessages';
 
-interface HotelPartnerDashboardProps {
-  hotelData: any;
-  onLogout: () => void;
-}
-
-const HotelPartnerDashboard: React.FC<HotelPartnerDashboardProps> = ({ 
-  hotelData, 
-  onLogout 
-}) => {
+const HotelPartnerDashboard = ({ hotelData, onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const renderContent = () => {

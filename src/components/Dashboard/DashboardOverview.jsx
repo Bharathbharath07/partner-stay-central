@@ -2,11 +2,7 @@
 import React from 'react';
 import { Building2, Users, Calendar, TrendingUp, MapPin, Star } from 'lucide-react';
 
-interface DashboardOverviewProps {
-  hotelData: any;
-}
-
-const DashboardOverview: React.FC<DashboardOverviewProps> = ({ hotelData }) => {
+const DashboardOverview = ({ hotelData }) => {
   const stats = [
     {
       title: 'Tour Bookings',

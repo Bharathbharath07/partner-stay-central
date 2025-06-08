@@ -10,19 +10,7 @@ import {
   Plane
 } from 'lucide-react';
 
-interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  onLogout: () => void;
-  hotelName: string;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ 
-  activeTab, 
-  onTabChange, 
-  onLogout, 
-  hotelName 
-}) => {
+const Sidebar = ({ activeTab, onTabChange, onLogout, hotelName }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'listings', label: 'Hotel Listing', icon: Building2 },

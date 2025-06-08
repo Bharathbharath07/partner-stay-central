@@ -7,7 +7,7 @@ const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hotelData, setHotelData] = useState(null);
 
-  const handleLogin = (credentials: { email: string; password: string }) => {
+  const handleLogin = (credentials) => {
     // Simulate successful login with mock hotel data
     setHotelData({
       hotelName: 'Grand Palace Hotel',

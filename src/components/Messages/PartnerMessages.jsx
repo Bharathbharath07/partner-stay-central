@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-const PartnerMessages: React.FC = () => {
+const PartnerMessages = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
