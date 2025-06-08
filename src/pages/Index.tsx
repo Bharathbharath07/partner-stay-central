@@ -1,14 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import LoginForm from '@/components/Auth/LoginForm';
+import HotelPartnerDashboard from '@/components/Dashboard/HotelPartnerDashboard';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hotelData, setHotelData] = useState(null);
+
+  const handleLogin = (credentials: { email: string; password: string }) => {
+    // Simulate successful login with mock hotel data
+    setHotelData({
+      hotelName: 'Grand Palace Hotel',
+      location: 'Mumbai, India',
+      partnerId: 'HTL001',
+      email: credentials.email
+    });
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setHotelData(null);
+  };
+
+  if (!isLoggedIn) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
+  return <HotelPartnerDashboard hotelData={hotelData} onLogout={handleLogout} />;
 };
 
 export default Index;
