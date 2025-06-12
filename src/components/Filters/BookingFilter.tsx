@@ -43,16 +43,19 @@ export const BookingFilter: React.FC<BookingFilterProps> = ({ onFilter, onReset 
     onReset();
   };
 
+  const handleStatusChange = (value: string) => {
+    setFilters(prev => ({ ...prev, status: value }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="status">Status</Label>
-        <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
+        <Select value={filters.status} onValueChange={handleStatusChange}>
           <SelectTrigger>
-            <SelectValue placeholder="Select status" />
+            <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
