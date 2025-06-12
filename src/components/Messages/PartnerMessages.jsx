@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, Send, Paperclip, Clock, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Send, Paperclip, Clock, CheckCircle2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Modal } from '@/components/ui/modal';
+import { ComposeMessageForm } from '@/components/Forms/ComposeMessageForm';
+import { toast } from 'sonner';
 
 const PartnerMessages = () => {
   const [messages, setMessages] = useState([
@@ -38,21 +40,62 @@ const PartnerMessages = () => {
 
   const [selectedMessage, setSelectedMessage] = useState(messages[0]);
   const [newMessage, setNewMessage] = useState('');
+  const [showComposeModal, setShowComposeModal] = useState(false);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      // Add new message logic here
+      toast.success('Reply sent successfully!');
       setNewMessage('');
     }
+  };
+
+  const handleCompose = (messageData) => {
+    const newMsg = {
+      id: messages.length + 1,
+      from: 'You',
+      subject: messageData.subject,
+      message: messageData.message,
+      timestamp: new Date().toLocaleString(),
+      isRead: true,
+      type: 'sent'
+    };
+    setMessages(prev => [newMsg, ...prev]);
+    setShowComposeModal(false);
+    toast.success('Message sent successfully!');
+  };
+
+  const handleMarkAsRead = (messageId) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId ? { ...msg, isRead: true } : msg
+    ));
+  };
+
+  const handleContactSupport = () => {
+    setShowComposeModal(true);
+  };
+
+  const handleReportIssue = () => {
+    const issueMessage = {
+      to: 'support',
+      subject: 'Issue Report',
+      message: 'I would like to report an issue with...'
+    };
+    handleCompose(issueMessage);
   };
 
   const unreadCount = messages.filter(m => !m.isRead).length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">Messages</h2>
-        <p className="text-muted-foreground">Communicate with travel agents and TravelMax support</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Messages</h2>
+          <p className="text-muted-foreground">Communicate with travel agents and TravelMax support</p>
+        </div>
+        <Button onClick={() => setShowComposeModal(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Compose Message
+        </Button>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 h-[600px]">
@@ -73,7 +116,10 @@ const PartnerMessages = () => {
             {messages.map((message) => (
               <div 
                 key={message.id}
-                onClick={() => setSelectedMessage(message)}
+                onClick={() => {
+                  setSelectedMessage(message);
+                  if (!message.isRead) handleMarkAsRead(message.id);
+                }}
                 className={`p-4 border-b border-border cursor-pointer hover:bg-secondary/50 transition-colors ${
                   selectedMessage?.id === message.id ? 'bg-secondary' : ''
                 } ${!message.isRead ? 'bg-primary/5' : ''}`}
@@ -125,9 +171,12 @@ const PartnerMessages = () => {
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       selectedMessage.type === 'system' 
                         ? 'bg-primary/10 text-primary' 
+                        : selectedMessage.type === 'sent'
+                        ? 'bg-accent/10 text-accent'
                         : 'bg-success/10 text-success'
                     }`}>
-                      {selectedMessage.type === 'system' ? 'System' : 'Travel Agent'}
+                      {selectedMessage.type === 'system' ? 'System' : 
+                       selectedMessage.type === 'sent' ? 'Sent' : 'Travel Agent'}
                     </span>
                   </div>
                 </div>
@@ -141,26 +190,28 @@ const PartnerMessages = () => {
               </div>
 
               {/* Reply Section */}
-              <div className="p-6 border-t border-border">
-                <div className="space-y-4">
-                  <Textarea
-                    placeholder="Type your reply..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <div className="flex items-center justify-between">
-                    <Button variant="outline" size="sm">
-                      <Paperclip className="w-4 h-4 mr-2" />
-                      Attach File
-                    </Button>
-                    <Button onClick={handleSendMessage}>
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Reply
-                    </Button>
+              {selectedMessage.type !== 'sent' && (
+                <div className="p-6 border-t border-border">
+                  <div className="space-y-4">
+                    <Textarea
+                      placeholder="Type your reply..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <div className="flex items-center justify-between">
+                      <Button variant="outline" size="sm">
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Attach File
+                      </Button>
+                      <Button onClick={handleSendMessage}>
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Reply
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </>
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -177,20 +228,32 @@ const PartnerMessages = () => {
       <div className="bg-card rounded-xl shadow-sm border p-6">
         <h3 className="font-semibold text-card-foreground mb-4">Quick Actions</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={handleContactSupport}>
             <MessageSquare className="w-4 h-4 mr-2" />
             Contact Support
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={handleReportIssue}>
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Report Issue
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={() => setShowComposeModal(true)}>
             <MessageSquare className="w-4 h-4 mr-2" />
             Send Bulk Message
           </Button>
         </div>
       </div>
+
+      {/* Compose Modal */}
+      <Modal
+        isOpen={showComposeModal}
+        onClose={() => setShowComposeModal(false)}
+        title="Compose Message"
+      >
+        <ComposeMessageForm
+          onSend={handleCompose}
+          onCancel={() => setShowComposeModal(false)}
+        />
+      </Modal>
     </div>
   );
 };

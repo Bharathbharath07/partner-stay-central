@@ -1,10 +1,12 @@
-
 import React, { useState } from 'react';
 import { Calendar, Users, MapPin, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { BookingFilter } from '@/components/Filters/BookingFilter';
+import { toast } from 'sonner';
 
 const TourBookings = () => {
-  const [bookings, setBookings] = useState([
+  const [allBookings] = useState([
     {
       id: 1,
       tourName: 'Golden Triangle Tour',
@@ -52,12 +54,16 @@ const TourBookings = () => {
     }
   ]);
 
+  const [bookings, setBookings] = useState(allBookings);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
   const handleStatusChange = (bookingId, newStatus) => {
     setBookings(prevBookings =>
       prevBookings.map(booking =>
         booking.id === bookingId ? { ...booking, status: newStatus } : booking
       )
     );
+    toast.success(`Booking ${newStatus} successfully!`);
   };
 
   const getStatusColor = (status) => {
@@ -66,6 +72,40 @@ const TourBookings = () => {
       case 'rejected': return 'status-rejected';
       default: return 'status-pending';
     }
+  };
+
+  const handleFilter = (filters) => {
+    let filtered = [...allBookings];
+
+    if (filters.status) {
+      filtered = filtered.filter(booking => booking.status === filters.status);
+    }
+    if (filters.tourName) {
+      filtered = filtered.filter(booking => 
+        booking.tourName.toLowerCase().includes(filters.tourName.toLowerCase())
+      );
+    }
+    if (filters.travelAgent) {
+      filtered = filtered.filter(booking => 
+        booking.travelAgent.toLowerCase().includes(filters.travelAgent.toLowerCase())
+      );
+    }
+    if (filters.dateFrom) {
+      filtered = filtered.filter(booking => booking.checkIn >= filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      filtered = filtered.filter(booking => booking.checkOut <= filters.dateTo);
+    }
+
+    setBookings(filtered);
+    setShowFilterModal(false);
+    toast.success('Filters applied successfully!');
+  };
+
+  const handleResetFilter = () => {
+    setBookings(allBookings);
+    setShowFilterModal(false);
+    toast.success('Filters reset successfully!');
   };
 
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
@@ -78,7 +118,7 @@ const TourBookings = () => {
           <h2 className="text-2xl font-bold text-foreground mb-2">Tour Bookings</h2>
           <p className="text-muted-foreground">Manage bookings from travel agents and tour packages</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={() => setShowFilterModal(true)}>
           <Filter className="w-4 h-4 mr-2" />
           Filter
         </Button>
@@ -219,6 +259,18 @@ const TourBookings = () => {
           </div>
         ))}
       </div>
+
+      {/* Filter Modal */}
+      <Modal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        title="Filter Bookings"
+      >
+        <BookingFilter
+          onFilter={handleFilter}
+          onReset={handleResetFilter}
+        />
+      </Modal>
     </div>
   );
 };

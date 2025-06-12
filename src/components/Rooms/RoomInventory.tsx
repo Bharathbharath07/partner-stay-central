@@ -1,10 +1,23 @@
-
 import React, { useState } from 'react';
-import { Bed, Users, Edit, Calendar, CheckCircle, X } from 'lucide-react';
+import { Bed, Users, Edit, Calendar, CheckCircle, X, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { RoomTypeForm } from '@/components/Forms/RoomTypeForm';
+import { toast } from 'sonner';
+
+interface RoomType {
+  id: number;
+  type: string;
+  capacity: number;
+  available: number;
+  total: number;
+  price: number;
+  amenities: string[];
+  status: string;
+}
 
 const RoomInventory: React.FC = () => {
-  const [rooms, setRooms] = useState([
+  const [rooms, setRooms] = useState<RoomType[]>([
     {
       id: 1,
       type: 'Deluxe Room',
@@ -52,9 +65,35 @@ const RoomInventory: React.FC = () => {
     { date: '2024-06-16', reason: 'Private Event' }
   ]);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<RoomType | null>(null);
+
   const totalRooms = rooms.reduce((sum, room) => sum + room.total, 0);
   const availableRooms = rooms.reduce((sum, room) => sum + room.available, 0);
   const occupancyRate = Math.round(((totalRooms - availableRooms) / totalRooms) * 100);
+
+  const handleAddRoom = (roomData: RoomType) => {
+    const newRoom = {
+      ...roomData,
+      id: Math.max(...rooms.map(r => r.id)) + 1
+    };
+    setRooms(prev => [...prev, newRoom]);
+    setShowAddModal(false);
+    toast.success('Room type added successfully!');
+  };
+
+  const handleEditRoom = (roomData: RoomType) => {
+    setRooms(prev => prev.map(room => 
+      room.id === editingRoom?.id ? { ...roomData, id: room.id } : room
+    ));
+    setEditingRoom(null);
+    toast.success('Room type updated successfully!');
+  };
+
+  const handleDeleteRoom = (roomId: number) => {
+    setRooms(prev => prev.filter(room => room.id !== roomId));
+    toast.success('Room type deleted successfully!');
+  };
 
   return (
     <div className="space-y-6">
@@ -121,7 +160,10 @@ const RoomInventory: React.FC = () => {
             <h3 className="text-lg font-semibold text-card-foreground">Room Types</h3>
             <p className="text-sm text-muted-foreground">Manage your room inventory and pricing</p>
           </div>
-          <Button>Add Room Type</Button>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Room Type
+          </Button>
         </div>
         
         <div className="p-6">
@@ -161,10 +203,20 @@ const RoomInventory: React.FC = () => {
                       </span>
                     </div>
                     
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => setEditingRoom(room)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleDeleteRoom(room.id)}
+                        className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 
@@ -220,6 +272,33 @@ const RoomInventory: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Add Room Modal */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add New Room Type"
+      >
+        <RoomTypeForm
+          onSave={handleAddRoom}
+          onCancel={() => setShowAddModal(false)}
+        />
+      </Modal>
+
+      {/* Edit Room Modal */}
+      <Modal
+        isOpen={!!editingRoom}
+        onClose={() => setEditingRoom(null)}
+        title="Edit Room Type"
+      >
+        {editingRoom && (
+          <RoomTypeForm
+            room={editingRoom}
+            onSave={handleEditRoom}
+            onCancel={() => setEditingRoom(null)}
+          />
+        )}
+      </Modal>
     </div>
   );
 };

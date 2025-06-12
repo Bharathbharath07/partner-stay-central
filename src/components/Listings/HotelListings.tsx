@@ -1,7 +1,9 @@
-
 import React, { useState } from 'react';
-import { Building2, Star, MapPin, Edit, Camera, Wifi, Car, Coffee } from 'lucide-react';
+import { Building2, Star, MapPin, Edit, Camera, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { HotelEditForm } from '@/components/Forms/HotelEditForm';
+import { toast } from 'sonner';
 
 const HotelListings: React.FC = () => {
   const [hotelInfo, setHotelInfo] = useState({
@@ -19,6 +21,9 @@ const HotelListings: React.FC = () => {
     isLive: true
   });
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
   const packageInclusions = [
     { name: 'Golden Triangle Tour', included: true, commission: '15%' },
     { name: 'Kerala Backwaters', included: true, commission: '18%' },
@@ -26,6 +31,16 @@ const HotelListings: React.FC = () => {
     { name: 'Goa Beach Package', included: false, commission: '12%' },
     { name: 'Himachal Adventure', included: false, commission: '16%' }
   ];
+
+  const handleEditSave = (data: any) => {
+    setHotelInfo(prev => ({ ...prev, ...data }));
+    setShowEditModal(false);
+    toast.success('Hotel information updated successfully!');
+  };
+
+  const handlePreview = () => {
+    setShowPreviewModal(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -46,22 +61,30 @@ const HotelListings: React.FC = () => {
               Your hotel is visible to travel agents and appearing in tour packages
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <Star className="w-5 h-5 text-warning fill-current" />
-            <span className="font-semibold text-foreground">{hotelInfo.rating}</span>
-            <span className="text-muted-foreground">({hotelInfo.totalReviews} reviews)</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Star className="w-5 h-5 text-warning fill-current" />
+              <span className="font-semibold text-foreground">{hotelInfo.rating}</span>
+              <span className="text-muted-foreground">({hotelInfo.totalReviews} reviews)</span>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={handlePreview}>
+                <Eye className="w-4 h-4 mr-2" />
+                Preview Listing
+              </Button>
+              <Button onClick={() => setShowEditModal(true)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Details
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Hotel Information */}
       <div className="bg-card rounded-xl shadow-sm border">
-        <div className="p-6 border-b border-border flex justify-between items-center">
+        <div className="p-6 border-b border-border">
           <h3 className="text-lg font-semibold text-card-foreground">Hotel Information</h3>
-          <Button variant="outline">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Details
-          </Button>
         </div>
         
         <div className="p-6">
@@ -182,6 +205,44 @@ const HotelListings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Hotel Information"
+      >
+        <HotelEditForm
+          hotelInfo={hotelInfo}
+          onSave={handleEditSave}
+          onCancel={() => setShowEditModal(false)}
+        />
+      </Modal>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        title="Hotel Listing Preview"
+      >
+        <div className="space-y-4">
+          <div className="aspect-video bg-secondary rounded-lg flex items-center justify-center">
+            <p className="text-muted-foreground">Hotel Image Preview</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-card-foreground">{hotelInfo.name}</h4>
+            <div className="flex items-center space-x-2 mt-1">
+              <Star className="w-4 h-4 text-warning fill-current" />
+              <span className="text-sm">{hotelInfo.rating} ({hotelInfo.totalReviews} reviews)</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">{hotelInfo.description}</p>
+          <div className="flex items-start space-x-2">
+            <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
+            <p className="text-sm text-muted-foreground">{hotelInfo.address}</p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
