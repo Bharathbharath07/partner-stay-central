@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Bed, Users, Edit, Calendar, CheckCircle, X, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -73,6 +74,7 @@ const RoomInventory: React.FC = () => {
   const occupancyRate = Math.round(((totalRooms - availableRooms) / totalRooms) * 100);
 
   const handleAddRoom = (roomData: RoomType) => {
+    console.log('Adding new room:', roomData);
     const newRoom = {
       ...roomData,
       id: Math.max(...rooms.map(r => r.id)) + 1
@@ -83,6 +85,7 @@ const RoomInventory: React.FC = () => {
   };
 
   const handleEditRoom = (roomData: RoomType) => {
+    console.log('Editing room:', roomData);
     setRooms(prev => prev.map(room => 
       room.id === editingRoom?.id ? { ...roomData, id: room.id } : room
     ));
@@ -91,8 +94,29 @@ const RoomInventory: React.FC = () => {
   };
 
   const handleDeleteRoom = (roomId: number) => {
+    console.log('Deleting room:', roomId);
     setRooms(prev => prev.filter(room => room.id !== roomId));
     toast.success('Room type deleted successfully!');
+  };
+
+  const handleShowAddModal = () => {
+    console.log('Opening add room modal');
+    setShowAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    console.log('Closing add room modal');
+    setShowAddModal(false);
+  };
+
+  const handleStartEdit = (room: RoomType) => {
+    console.log('Starting edit for room:', room);
+    setEditingRoom(room);
+  };
+
+  const handleCancelEdit = () => {
+    console.log('Cancelling room edit');
+    setEditingRoom(null);
   };
 
   return (
@@ -160,7 +184,7 @@ const RoomInventory: React.FC = () => {
             <h3 className="text-lg font-semibold text-card-foreground">Room Types</h3>
             <p className="text-sm text-muted-foreground">Manage your room inventory and pricing</p>
           </div>
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button onClick={handleShowAddModal}>
             <Plus className="w-4 h-4 mr-2" />
             Add Room Type
           </Button>
@@ -204,7 +228,7 @@ const RoomInventory: React.FC = () => {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => setEditingRoom(room)}>
+                      <Button variant="outline" size="sm" onClick={() => handleStartEdit(room)}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
@@ -276,26 +300,26 @@ const RoomInventory: React.FC = () => {
       {/* Add Room Modal */}
       <Modal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={handleCloseAddModal}
         title="Add New Room Type"
       >
         <RoomTypeForm
           onSave={handleAddRoom}
-          onCancel={() => setShowAddModal(false)}
+          onCancel={handleCloseAddModal}
         />
       </Modal>
 
       {/* Edit Room Modal */}
       <Modal
         isOpen={!!editingRoom}
-        onClose={() => setEditingRoom(null)}
+        onClose={handleCancelEdit}
         title="Edit Room Type"
       >
         {editingRoom && (
           <RoomTypeForm
             room={editingRoom}
             onSave={handleEditRoom}
-            onCancel={() => setEditingRoom(null)}
+            onCancel={handleCancelEdit}
           />
         )}
       </Modal>

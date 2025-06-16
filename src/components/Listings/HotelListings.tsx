@@ -37,13 +37,30 @@ const HotelListings: React.FC = () => {
   ];
 
   const handleEditSave = (data: any) => {
+    console.log('Saving hotel edit data:', data);
     setHotelInfo(prev => ({ ...prev, ...data }));
     setShowEditModal(false);
     toast.success('Hotel information updated successfully!');
   };
 
   const handlePreview = () => {
+    console.log('Opening hotel preview modal');
     setShowPreviewModal(true);
+  };
+
+  const handleEdit = () => {
+    console.log('Opening hotel edit modal');
+    setShowEditModal(true);
+  };
+
+  const handleEditCancel = () => {
+    console.log('Cancelling hotel edit');
+    setShowEditModal(false);
+  };
+
+  const handlePreviewClose = () => {
+    console.log('Closing hotel preview');
+    setShowPreviewModal(false);
   };
 
   return (
@@ -57,7 +74,7 @@ const HotelListings: React.FC = () => {
         rating={hotelInfo.rating}
         totalReviews={hotelInfo.totalReviews}
         onPreview={handlePreview}
-        onEdit={() => setShowEditModal(true)}
+        onEdit={handleEdit}
       />
 
       <HotelInformation
@@ -75,20 +92,20 @@ const HotelListings: React.FC = () => {
       {/* Edit Modal */}
       <Modal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        onClose={handleEditCancel}
         title="Edit Hotel Information"
       >
         <HotelEditForm
           hotelInfo={hotelInfo}
           onSave={handleEditSave}
-          onCancel={() => setShowEditModal(false)}
+          onCancel={handleEditCancel}
         />
       </Modal>
 
       {/* Preview Modal */}
       <Modal
         isOpen={showPreviewModal}
-        onClose={() => setShowPreviewModal(false)}
+        onClose={handlePreviewClose}
         title="Hotel Listing Preview"
       >
         <HotelPreview
